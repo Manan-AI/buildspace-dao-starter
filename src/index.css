@@ -4,7 +4,10 @@ body {
   font-family: Inter, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #7700ee;
+  background: -webkit-linear-gradient(left, #FFC72C 30%, #DA291C 60%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: white;
   color: #fff;
   overflow-x: hidden;
 }
