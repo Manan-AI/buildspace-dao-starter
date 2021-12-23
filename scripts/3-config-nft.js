@@ -3,7 +3,7 @@ import { readFileSync } from "fs";
 
 // this is our ERC-1155 contract (each NFT is the same, vs ERC-721)
 const bundleDrop = sdk.getBundleDropModule(
-  "0x27a357d83E1A0A862566ff7bf0620240C18Ed7D8",
+  "0xdF58f0cf65B5FF497339EAF1920aBb36630fA930",
 );
 
 (async () => {
