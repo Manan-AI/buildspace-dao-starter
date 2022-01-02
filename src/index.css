@@ -64,11 +64,18 @@ h1 {
   text-align: center;
 }
 
+.landing > img {
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 50px;
+  width: 250px;
+}
+
 .member-page > div {
   display: flex;
   flex-direction: row;
   width: 100%;
-  text-align: left;
+  text-align: center;
   gap: 2rem;
 }
 .member-page > div > div {
@@ -76,6 +83,12 @@ h1 {
   flex-direction: column;
   width: 50%;
   gap: 1rem;
+}
+.member-page > img {
+  margin-left: auto;
+  margin-right: auto;
+  width: 250px;
+  padding-top: 50px;
 }
 @media screen and (max-width: 768px) {
   .member-page > div {
@@ -145,4 +158,11 @@ button:focus {
 button:disabled {
   opacity: 0.8;
   pointer-events: none;
+}
+
+.footer {
+  display: block;
+  flex-direction: unset;
+  width: 100%;
+  text-align: center;
 }

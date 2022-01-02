@@ -4,7 +4,7 @@ import { ethers } from 'ethers';
 // import thirdweb
 import { useWeb3 } from '@3rdweb/hooks';
 import { ThirdwebSDK } from "@3rdweb/sdk";
-
+import mickeyLogo from "./mickey_logo.PNG"
 import { UnsupportedChainIdError } from "@web3-react/core";
 
 // instantiate the SDK on rinkeby
@@ -205,10 +205,18 @@ const App = () => {
     console.log('User has not yet connected wallet');
     return (
       <div className='landing'>
+        <img src={mickeyLogo} alt='Mickey Logo'></img>
         <h1>Welcome to MickeyDAO</h1>
+        <div>
+          <br></br>
+          <br></br>
+        </div>
         <button onClick={() => connectWallet("injected")} className='btn-hero'>
           Connect Wallet
         </button>
+        <div className='footer'>
+          <h2>Built by @web3_degen with @_buildspace and @thirdweb 🌈</h2>
+        </div>
       </div>
     );
   };
@@ -217,6 +225,7 @@ const App = () => {
   if (hasClaimedNFT) {
     return (
       <div className="member-page">
+        <img src={mickeyLogo} alt='Mickey Logo'></img>
         <h1>MickeyDAO Member Page</h1>
         <div>
           <div>
@@ -365,6 +374,9 @@ const App = () => {
             </form>
           </div>
         </div>
+        <div className='footer'>
+          <h2>Built by @web3_degen with @_buildspace and @thirdweb 🌈</h2>
+        </div>
       </div>
     );
   };
@@ -372,13 +384,16 @@ const App = () => {
   // Render mint nft screen.
   return (
     <div className="mint-nft">
-      <h1>Mint your free 🍪 DAO Membership NFT</h1>
+      <h1>Mint your free 🌈 DAO Membership NFT</h1>
       <button
         disabled={isClaiming}
         onClick={() => mintNft()}
       >
         {isClaiming ? "Minting..." : "Mint your nft (FREE)"}
       </button>
+      <div className='footer'>
+        <h2>Built by @web3_degen with @_buildspace and @thirdweb 🌈</h2>
+      </div>
     </div>
   );
 };
