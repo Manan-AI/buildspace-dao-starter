@@ -1,6 +1,6 @@
 // useMemo is new to me!
 import { useState, useEffect, useMemo } from 'react';
-
+import { ethers } from 'ethers';
 // import thirdweb
 import { useWeb3 } from '@3rdweb/hooks';
 import { ThirdwebSDK } from "@3rdweb/sdk";
@@ -10,6 +10,8 @@ const sdk = new ThirdwebSDK("rinkeby");
 
 // grab a reference to our ERC-1155 contract 
 const bundleDropModule = sdk.getBundleDropModule("0xdF58f0cf65B5FF497339EAF1920aBb36630fA930");
+const tokenModule = sdk.getTokenModule("0x10FF7Ac6E25f770cFaBB82f9d020B00C3A443468");
+const voteModule = sdk.getVoteModule("0x8f683e761C078DC0BbBBAa904a263272EFf18519");
 
 const App = () => {
   // use ConnectWallet hook from thirdweb
@@ -21,6 +23,113 @@ const App = () => {
 
   const [hasClaimedNFT, setHasClaimedNFT] = useState(false);  // boolean state var
   const [isClaiming, setIsClaiming] = useState(false);
+  // holds the amount of token each member has in state
+  const [memberTokenAmounts, setMemberTokenAmounts] = useState({});
+  // array holding all of our members addresses
+  const [memberAddresses, setMemberAddresses] = useState([]);
+  // governance state vars
+  const [proposals, setProposals] = useState([]);
+  const [isVoting, setIsVoting] = useState(false);
+  const [hasVoted, setHasVoted] = useState(false);
+
+  // function to shorten user addresses
+  const shortenAddress = (str) => {
+    return str.substring(0, 6) + "..." + str.substring(str.length - 4);
+  };
+
+  // retrieve all existing proposals from the contract
+  useEffect(() => {
+    if (!hasClaimedNFT) {
+      return;
+    }
+
+    voteModule
+      .getAll()
+      .then((proposals) => {
+        // set state
+        setProposals(proposals);
+        console.log("🌈 Proposals:", proposals);
+      })
+      .catch((error) => {
+        console.error("Error obtaining proposals!", error);
+      }); 
+  }, [hasClaimedNFT]);
+
+  // check if the user has already voted
+  useEffect(() => {
+    if (!hasClaimedNFT) {
+      return;
+    }
+
+    // if we haven't finished retrieving all proposals above then 
+    // we can't check if the user voted yet!
+    if (!proposals.length) {
+      return;
+    }
+
+    voteModule
+      .hasVoted(proposals[0].proposalId, address)
+      .then((hasVoted) => {
+        setHasVoted(hasVoted);
+        if (hasVoted) {
+          console.log("User has already voted!")
+        }
+      })
+      .catch((error) => {
+        console.log("Error checking member voting status!", error);      
+      });
+  }, [hasClaimedNFT, proposals, address]);
+
+  // obtain an updated list of DAO member addresses
+  useEffect(() => {
+    if (!hasClaimedNFT) {
+      return;
+    }
+
+    // grab users who hold our NFT with tokenId 0
+    bundleDropModule
+      .getAllClaimerAddresses("0")
+      .then((addresses) => {
+        console.log("🚀 Members addresses", addresses);
+        setMemberAddresses(addresses);
+      })
+      .catch((error) => {
+        console.log("Error obtaining member addresses.", error);
+      });
+  }, [hasClaimedNFT]);
+
+  // This useEffect grabs the # of token each member holds.
+  useEffect(() => {
+    if (!hasClaimedNFT) {
+      return;
+    }
+
+    // grab all member balances
+    tokenModule
+      .getAllHolderBalances()
+      .then((amounts) => {
+        console.log("Amounts: ", amounts);
+        setMemberTokenAmounts(amounts);
+      })
+      .catch((error) => {
+        console.log("Error obtaining member token amounts.", error);
+      });
+  }, [hasClaimedNFT]);
+
+  // combine member addresses and token amounts into single array
+  const memberList = useMemo(() => {
+    return memberAddresses.map((address) => {
+      return {
+        address, 
+        tokenAmount: ethers.utils.formatUnits(
+          // if the address in memberTokenAmounts, then
+          // they don't have any of our token
+          memberTokenAmounts[address] || 0,
+          18,
+        ),
+      };
+    });
+  }, [memberAddresses, memberTokenAmounts]);
 
   // when the signer updates, pass it to the SDK
   useEffect(() => {
@@ -58,8 +167,8 @@ const App = () => {
     // Call bundleDropModule.claim("0", 1) to mint nft to user's wallet.
     bundleDropModule
     .claim("0", 1) // tokenId, quantity
-    .catch((err) => {
-      console.error("failed to claim", err);
+    .catch((error) => {
+      console.error("failed to claim", error);
       setIsClaiming(false);
     })
     .finally(() => {
@@ -94,6 +203,29 @@ const App = () => {
       <div className="member-page">
         <h1>🍟 MickeyDAO Member Page</h1>
         <p>Get in here and close the door, this spliff is getting me twisted </p>
+        <div>
+          <div>
+            <h2>Member List</h2>
+            <table className='card'>
+              <thead>
+                <tr>
+                  <th>Address</th>
+                  <th>Token Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                {memberList.map((member) => {
+                  return(
+                    <tr key={member.address}>
+                      <td>{shortenAddress(member.address)}</td>
+                      <td>{member.tokenAmount}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     );
   };
